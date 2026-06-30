@@ -1,0 +1,1 @@
+acceptance criteria from the ticket body. Score only based on explicit evidence in the ticket; do not guess missing information. If something is unclear, missing, or only implied, choose the lower score. Use 0 when there is no assessable evidence for a 0–4 metric. For each score, provide a short rationale explaining the main evidence or missing information.
