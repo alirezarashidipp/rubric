@@ -1,10 +1,10 @@
 name: jira_story_quality_evaluator
-version: "3.0"
+version: "4.0"
 language: en
 
 openai:
   api: responses
-  model: gpt-5.5
+  model: gpt-5.4
   temperature: 0
   structured_outputs:
     schema_module: schema
@@ -50,11 +50,11 @@ messages:
         - Set presence_of_then to 0.
         - Set specific_and_measurable to 0.
         - Set user_focused_tech_agnostic to 0.
-        - Set logical_structure to 1.
-        - Set clear_language to 1.
-        - Set thoroughness_edge_cases to 1.
+        - Set logical_structure to 0.
+        - Set clear_language to 0.
+        - Set thoroughness_edge_cases to 0.
         - Set ac_aligned_with_story to 0.
-        - Set testable_independent to 1.
+        - Set testable_independent to 0.
       Do not assign positive acceptance-criteria quality scores merely because there is no bad acceptance criteria.
       Missing acceptance criteria is absence of evidence, not evidence of quality.
        
@@ -83,7 +83,7 @@ messages:
       - Do not calculate a final score.
       - Do not calculate a weighted score.
       - For binary metrics, return only 0 or 1.
-      - For scale-4 metrics, return only 1, 2, 3, or 4.
+      - For scale-4 metrics, return only 0, 1, 2, 3, or 4.
       - For estimated_story_points, return only 1, 2, 3, 5, 8, or 13.
       - For count_of_ac, return an integer from 0 through 50.
       - If uncertain between two scores, choose the lower score unless the higher score is directly supported by ticket evidence.
@@ -149,6 +149,7 @@ messages:
       - Positive examples: "As a Data Analyst, I want to export customer records so that I can analyze them offline.", "Add validation to uploaded CSV files.", "Show an error when a required field is missing."
 
       understandability.user_story_description.appropriate_level_of_detail:
+      - 0 = no identifiable story description or no assessable evidence.
       - 1 = almost no useful detail.
       - 2 = limited detail with major ambiguity.
       - 3 = enough detail for initial understanding.
@@ -159,19 +160,15 @@ messages:
       - Score 3 example: "As a Relationship Manager, I want to view a customer's latest risk score on the customer profile page so that I can prioritize high-risk customers during daily review." Rationale: enough for initial understanding, but score freshness, unavailable-score behaviour, and permissions are missing.
       - Score 4 example: "As a Relationship Manager, I want to view the customer's latest approved risk score, score date, and risk category on the customer profile page so that I can prioritize high-risk customers during daily portfolio review. The score should be visible only to users with customer-risk access and should show 'Risk score unavailable' when no approved score exists." Rationale: clear, sufficient, and well-balanced detail.
 
-      understandability.user_story_description.examples_for_complex_requirements:
-      - Return 1 if the requirement is simple and examples are not needed.
-      - Return 1 if the requirement is complex and useful examples are provided.
-      - Return 0 if the requirement is complex and examples are missing.
-      - Complex requirements include complicated rules, calculations, data mappings, exception handling, multi-step workflows, or domain-specific logic.
-
       understandability.user_story_description.consistent_terminology:
+      - 0 = no identifiable story description or no assessable evidence.
       - 1 = confusing or inconsistent terminology.
       - 2 = noticeable inconsistencies.
       - 3 = mostly consistent terminology.
       - 4 = fully consistent and domain-appropriate terminology.
 
       understandability.user_story_description.clarity:
+      - 0 = no identifiable story description or no assessable evidence.
       - 1 = unclear.
       - 2 = partially clear but ambiguous.
       - 3 = mostly clear.
@@ -195,18 +192,21 @@ messages:
       - Too implementation-driven example: "Then the service calls endpoint /v2/cache/refresh and updates table X with flag Y" unless that technical behaviour is the actual business requirement.
 
       specificity.acceptance_criteria.logical_structure:
-      - 1 = missing, unstructured, or hard to follow.
+      - 0 = no acceptance criteria are clearly provided.
+      - 1 = present but unstructured or hard to follow.
       - 2 = weak or inconsistent structure.
       - 3 = mostly logical structure.
       - 4 = clear, ordered, and easy-to-follow structure.
 
       specificity.acceptance_criteria.clear_language:
+      - 0 = no acceptance criteria are clearly provided.
       - 1 = unclear or ambiguous language.
       - 2 = several unclear parts.
       - 3 = mostly clear language.
       - 4 = precise and unambiguous language.
 
       testability_and_coverage.acceptance_criteria.thoroughness_edge_cases:
+      - 0 = no acceptance criteria are clearly provided.
       - 1 = edge cases, negative paths, exceptions, or boundary cases are missing.
       - 2 = weak edge-case coverage.
       - 3 = important edge cases are mostly covered.
@@ -220,12 +220,14 @@ messages:
       - Return 0 if acceptance criteria are missing, unrelated, contradictory, or misaligned.
 
       testability_and_coverage.acceptance_criteria.testable_independent:
+      - 0 = no acceptance criteria are clearly provided.
       - 1 = not testable or not independently verifiable.
       - 2 = partially testable.
       - 3 = mostly testable.
       - 4 = clearly and independently testable.
 
       scope.user_story_description.clear_scope_boundaries:
+      - 0 = no identifiable story description or no assessable evidence.
       - 1 = scope is unclear or open-ended.
       - 2 = partially bounded but still ambiguous.
       - 3 = mostly clear with minor missing assumptions or exclusions.
@@ -259,7 +261,7 @@ messages:
 
       Example D: missing AC
       Input: "As a Data Scientist, I want to compare model performance across versions so that I can select the best model for deployment."
-      Expected behaviour: story actor/action/value are present, but count_of_ac = 0 and AC-related metrics should reflect missing acceptance criteria evidence.
+      Expected behaviour: story actor/action/value are present, but count_of_ac = 0 and AC-related binary metrics should be 0; AC-related scale metrics should use 0 where there is no acceptance criteria evidence.
 
   - role: user
     content: |-

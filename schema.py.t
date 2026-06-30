@@ -1,10 +1,6 @@
-"""Strict Pydantic schema for Jira user story quality evaluation.
-
-Designed for OpenAI Structured Outputs:
-- every output field is required;
-- unknown fields are forbidden;
-- bounded metric values use Literal enums;
-- the LLM does not calculate final or weighted scores.
+"""
+version = 4.0
+5.4
 """
 
 from __future__ import annotations
@@ -15,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 BinaryScore: TypeAlias = Literal[0, 1]
-Scale4Score: TypeAlias = Literal[1, 2, 3, 4]
+Scale4Score: TypeAlias = Literal[0, 1, 2, 3, 4]
 StoryPointEstimate: TypeAlias = Literal[1, 2, 3, 5, 8, 13]
 AcceptanceCriteriaCount: TypeAlias = Literal[
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -123,7 +119,7 @@ class UnderstandabilityUserStoryDescription(StrictBaseModel):
         ...,
         description=(
             "Concise explanation for the understandability.user_story_description scores. "
-            "Mention coherence, detail level, examples, terminology, and clarity. "
+            "Mention coherence, detail level, terminology, and clarity. "
             "Do not include chain-of-thought."
         ),
     )
@@ -137,32 +133,26 @@ class UnderstandabilityUserStoryDescription(StrictBaseModel):
     appropriate_level_of_detail: Scale4Score = Field(
         ...,
         description=(
-            "Level of detail quality. 1 = almost no useful detail; 2 = limited detail "
-            "with major ambiguity; 3 = enough detail for initial understanding; "
-            "4 = clear, sufficient, and well-balanced detail."
-        ),
-    )
-    examples_for_complex_requirements: BinaryScore = Field(
-        ...,
-        description=(
-            "Binary score. Return 1 if the requirement is simple and examples are not needed, "
-            "or if the requirement is complex and useful examples are provided. Return 0 if "
-            "the requirement is complex and examples are missing."
+            "Level of detail quality. 0 = no identifiable story description or no assessable evidence; "
+            "1 = almost no useful detail; 2 = limited detail with major ambiguity; "
+            "3 = enough detail for initial understanding; 4 = clear, sufficient, "
+            "and well-balanced detail."
         ),
     )
     consistent_terminology: Scale4Score = Field(
         ...,
         description=(
-            "Terminology consistency. 1 = confusing or inconsistent terminology; "
-            "2 = noticeable inconsistencies; 3 = mostly consistent terminology; "
-            "4 = fully consistent and domain-appropriate terminology."
+            "Terminology consistency. 0 = no identifiable story description or no assessable evidence; "
+            "1 = confusing or inconsistent terminology; 2 = noticeable inconsistencies; "
+            "3 = mostly consistent terminology; 4 = fully consistent and domain-appropriate terminology."
         ),
     )
     clarity: Scale4Score = Field(
         ...,
         description=(
-            "Story writing clarity. 1 = unclear; 2 = partially clear but ambiguous; "
-            "3 = mostly clear; 4 = very clear and easy to understand."
+            "Story writing clarity. 0 = no identifiable story description or no assessable evidence; "
+            "1 = unclear; 2 = partially clear but ambiguous; 3 = mostly clear; "
+            "4 = very clear and easy to understand."
         ),
     )
 
@@ -198,17 +188,17 @@ class SpecificityAcceptanceCriteria(StrictBaseModel):
     logical_structure: Scale4Score = Field(
         ...,
         description=(
-            "Acceptance criteria structure. 1 = missing, unstructured, or hard to follow; "
-            "2 = weak or inconsistent structure; 3 = mostly logical structure; "
-            "4 = clear, ordered, and easy to follow."
+            "Acceptance criteria structure. 0 = no acceptance criteria are clearly provided; "
+            "1 = present but unstructured or hard to follow; 2 = weak or inconsistent structure; "
+            "3 = mostly logical structure; 4 = clear, ordered, and easy to follow."
         ),
     )
     clear_language: Scale4Score = Field(
         ...,
         description=(
-            "Acceptance criteria language quality. 1 = unclear or ambiguous language; "
-            "2 = several unclear parts; 3 = mostly clear language; "
-            "4 = precise and unambiguous language."
+            "Acceptance criteria language quality. 0 = no acceptance criteria are clearly provided; "
+            "1 = unclear or ambiguous language; 2 = several unclear parts; "
+            "3 = mostly clear language; 4 = precise and unambiguous language."
         ),
     )
 
@@ -229,10 +219,11 @@ class TestabilityAndCoverageAcceptanceCriteria(StrictBaseModel):
     thoroughness_edge_cases: Scale4Score = Field(
         ...,
         description=(
-            "Edge-case and coverage quality. 1 = edge cases, negative paths, exceptions, "
-            "or boundary cases are missing; 2 = weak edge-case coverage; "
-            "3 = important edge cases are mostly covered; 4 = edge cases and alternative "
-            "paths are well covered. Happy-path-only AC should normally score 1 or 2, not 4."
+            "Edge-case and coverage quality. 0 = no acceptance criteria are clearly provided; "
+            "1 = edge cases, negative paths, exceptions, or boundary cases are missing; "
+            "2 = weak edge-case coverage; 3 = important edge cases are mostly covered; "
+            "4 = edge cases and alternative paths are well covered. Happy-path-only AC should "
+            "normally score 1 or 2, not 4."
         ),
     )
     ac_aligned_with_story: BinaryScore = Field(
@@ -246,8 +237,9 @@ class TestabilityAndCoverageAcceptanceCriteria(StrictBaseModel):
     testable_independent: Scale4Score = Field(
         ...,
         description=(
-            "Independent testability. 1 = not testable or not independently verifiable; "
-            "2 = partially testable; 3 = mostly testable; 4 = clearly and independently testable."
+            "Independent testability. 0 = no acceptance criteria are clearly provided; "
+            "1 = not testable or not independently verifiable; 2 = partially testable; "
+            "3 = mostly testable; 4 = clearly and independently testable."
         ),
     )
 
@@ -268,9 +260,10 @@ class ScopeUserStoryDescription(StrictBaseModel):
     clear_scope_boundaries: Scale4Score = Field(
         ...,
         description=(
-            "Scope boundary quality. 1 = scope is unclear or open-ended; "
-            "2 = partially bounded but still ambiguous; 3 = mostly clear with minor missing "
-            "assumptions or exclusions; 4 = clear boundaries, inclusions, exclusions, and assumptions."
+            "Scope boundary quality. 0 = no identifiable story description or no assessable evidence; "
+            "1 = scope is unclear or open-ended; 2 = partially bounded but still ambiguous; "
+            "3 = mostly clear with minor missing assumptions or exclusions; 4 = clear boundaries, "
+            "inclusions, exclusions, and assumptions."
         ),
     )
 
@@ -315,7 +308,9 @@ class JiraStoryQualityEvaluation(StrictBaseModel):
     reasoning: str = Field(
         ...,
         description=(
-            "Concise overall assessment summary of the main strengths and weaknesses of the story "),
+            "Concise overall assessment summary of the main strengths and weaknesses of the story "
+            "and acceptance criteria. This is not chain-of-thought."
+        ),
     )
     format_story: FormatStory
     format_ac: FormatAcceptanceCriteria
